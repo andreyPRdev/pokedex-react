@@ -6,7 +6,6 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
-  const [pokemonsDetails, setPokemonsDetails] = useState(null);
   const showPokemonDetails = async (pokemon) => {
     console.log('Clicou em:', pokemon.name);
     try {
