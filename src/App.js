@@ -44,7 +44,7 @@ if(error) return <div className="error">❌{error}</div>
 
   return (
   <div className="App">
-    <h1>Pokedex</h1>
+    <h1>Andrey DEX</h1>
 
     <div className="pokemon-container">
       <input
