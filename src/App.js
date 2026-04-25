@@ -16,6 +16,10 @@ function App() {
       console.error('Erro', error);
     }
   };
+  const [currentPage, setCurrentPage] = useState(1);
+  const pokemonsPerPage = 29;
+  const [darkMode, setDarkMode] = useState(false);
+  const [activeRegion, setActiveRegion] = useState('all');
 
 
   useEffect (() => {
@@ -34,18 +38,99 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    if (darkMode) {
+     document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
   const [search, setSearch] = useState("");
-  const filteredPokemons = pokemons.filter((pokemon) =>
+
+const getRegion = (id) => {
+  if (id <= 151) return 'kanto';
+  if (id <= 251) return 'johto';
+  if (id <= 386) return 'hoenn';
+  if (id <= 493) return 'sinnoh';
+  if (id <= 649) return 'unova';
+  if (id <= 721) return 'kalos';
+  return 'all';
+};
+
+const regionFiltered = activeRegion === 'all' 
+  ? pokemons 
+  : pokemons.filter(p => {
+      const id = p.url.split("/")[6];
+      return getRegion(id) === activeRegion;
+    });
+
+const filteredPokemons = regionFiltered.filter(pokemon =>
   pokemon.name.toLowerCase().includes(search.toLowerCase())
 );
 
+const indexOfLastPokemon = currentPage * pokemonsPerPage;
+const currentPokemons = filteredPokemons.slice(0, indexOfLastPokemon);
+
 if(loading) return <div className="Loading">Carregando os Pokemon...</div>
-if(error) return <div className="error">❌{error}</div>
+if(error) return <div className="error">X{error}</div>
 
   return (
   <div className="App">
     <h1>Pokedex</h1>
 
+    <div className="regions">
+  <button 
+    className={activeRegion === 'all' ? 'active' : ''} 
+    onClick={() => setActiveRegion('all')}
+  >
+    All ({pokemons.length})
+  </button>
+  <button 
+    className={activeRegion === 'kanto' ? 'active' : ''} 
+    onClick={() => setActiveRegion('kanto')}
+  >
+    Kanto (1-151)
+  </button>
+  <button 
+    className={activeRegion === 'johto' ? 'active' : ''} 
+    onClick={() => setActiveRegion('johto')}
+  >
+    Johto (152-251)
+  </button>
+  <button 
+    className={activeRegion === 'hoenn' ? 'active' : ''} 
+    onClick={() => setActiveRegion('hoenn')}
+  >
+    Hoenn (252-386)
+  </button>
+  <button 
+    className={activeRegion === 'sinnoh' ? 'active' : ''} 
+    onClick={() => setActiveRegion('sinnoh')}
+  >
+    Sinnoh (387-493)
+  </button>
+  <button 
+    className={activeRegion === 'unova' ? 'active' : ''} 
+    onClick={() => setActiveRegion('unova')}
+  >
+    Unova (494-649)
+  </button>
+  <button 
+    className={activeRegion === 'kalos' ? 'active' : ''} 
+    onClick={() => setActiveRegion('kalos')}
+  >
+    Kalos (650-721)
+  </button>
+</div>
+
+    <div className="theme-toggle">
+  <button onClick={() => setDarkMode(!darkMode)}>
+    {darkMode ? 'Light' : 'Dark'}
+  </button>
+</div>
+
+    
     <div className="pokemon-container">
       <input
   type="text"
@@ -54,7 +139,7 @@ if(error) return <div className="error">❌{error}</div>
   onChange={(e) => setSearch(e.target.value)}
 />
 
-      {filteredPokemons.map((pokemon) => {
+      {currentPokemons.map((pokemon) => {
         const id = pokemon.url.split("/")[6];
 
         return (
@@ -84,9 +169,9 @@ if(error) return <div className="error">❌{error}</div>
       
       <div className="stats">
         <p><strong>HP:</strong> {selectedPokemon.stats[0].base_stat}</p>
-        <p><strong>Ataque:</strong> {selectedPokemon.stats[1].base_stat}</p>
-        <p><strong>Defesa:</strong> {selectedPokemon.stats[2].base_stat}</p>
-        <p><strong>Velocidade:</strong> {selectedPokemon.stats[5].base_stat}</p>
+        <p><strong>Attack:</strong> {selectedPokemon.stats[1].base_stat}</p>
+        <p><strong>Defense:</strong> {selectedPokemon.stats[2].base_stat}</p>
+        <p><strong>Speed:</strong> {selectedPokemon.stats[5].base_stat}</p>
       </div>
       
       <div className="types">
@@ -101,7 +186,25 @@ if(error) return <div className="error">❌{error}</div>
     </div>
   </div>
 )}
+
+ 
+
 </div>
+
+ <div className="pagination">
+    <button
+      onClick={() => setCurrentPage(currentPage - 1)}
+      disabled={currentPage === 1}>
+        Anterior
+    </button>
+    <span>Página {currentPage} | {Math.ceil(filteredPokemons.length / pokemonsPerPage)}</span>
+    <button
+       onClick={() => setCurrentPage(currentPage + 1)}
+       disabled={currentPokemons.length < pokemonsPerPage}
+    >
+        Próxima
+    </button>
+  </div>
 
 </div>
 );
